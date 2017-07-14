@@ -1,4 +1,4 @@
-require 'Date'
+require "Date"
 
 class Squealer
   attr_reader :table_name, :csv
@@ -23,32 +23,42 @@ class Squealer
   def build_header_hash
     if !!@csv
       header_hash = {}
-      varchar_index_array = []
+      # varchar_index_array = []
       @csv.each_with_index do |line, line_index|
         if is_header?(line_index)
           header_hash = init_headers(line)
         else
           line.strip.split(',').each_with_index do |item, item_index|
-            if varchar_index_array.index item_index
-              if header_hash[item_index][:length] < item.length
-                header_hash[item_index][:length] = item.length
-              end
-            elsif !header_hash[item_index][:type]
-              if is_blank?(item)
-                next
-              elsif is_bool?(item)
-                header_hash[item_index][:type] = 'boolean'
+            if is_blank?(item)
+              next
+            elsif header_hash[item_index][:type] != "varchar"
+              current_type = ""
+              if is_bool?(item)
+                current_type = "boolean"
               elsif is_int?(item)
-                header_hash[item_index][:type] = "int"
+                current_type = "int"
               elsif is_float?(item)
-                header_hash[item_index][:type] = "float4"
+                current_type = "float4"
               elsif is_timestamp?(item)
-                header_hash[item_index][:type] = "timestamp"
+                current_type = "timestamp"
               else
-                header_hash[item_index][:type] = "varchar"
-                header_hash[item_index][:length] = item.length
-                varchar_index_array << item_index
+                current_type = "varchar"
               end
+
+              if header_hash[item_index][:type]
+                type_in_hash = header_hash[item_index][:type]
+                if !is_type_consistant?(type_in_hash, current_type)
+                  header_hash[item_index][:type] = "varchar"
+                end
+              else
+                header_hash[item_index][:type] = current_type
+              end
+            end
+
+            if !header_hash[item_index][:length]
+              header_hash[item_index][:length] = item.length
+            elsif header_hash[item_index][:length] < item.length
+              header_hash[item_index][:length] = item.length
             end
           end
         end
@@ -57,6 +67,10 @@ class Squealer
     else
       puts "Error: csv has to be set to get hash"
     end
+  end
+
+  def is_type_consistant?(type_in_hash, current_type)
+    type_in_hash == current_type
   end
 
   def is_header?(line_index)

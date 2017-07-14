@@ -148,11 +148,26 @@ describe "Squealer" do
       new_file = File.open(File.join(File.dirname(__FILE__), "../data.csv"))
       squeal.csv = new_file
       expect(squeal.build_header_hash).to include(
-        0 => {:name=>"id", :type=>"int"},
+        0 => {:name=>"id", :type=>"int", :length=>1},
         1 => {:name=>"place", :type=>"varchar", :length=>5},
-        2 => {:name=>"score", :type=>"float4"}
+        2 => {:name=>"score", :type=>"float4", :length=>4}
       )
     end
+  end
+
+  describe "#is_type_consistant?" do
+    it "returns true if types are the same" do
+      type_in_hash = 'int'
+      current_type = 'int'
+      expect(squeal.is_type_consistant?(type_in_hash, current_type)).to eq(true)
+    end
+
+    it "returns false if types are the same" do
+      type_in_hash = 'float4'
+      current_type = 'int'
+      expect(squeal.is_type_consistant?(type_in_hash, current_type)).to eq(false)
+    end
+
   end
 
   describe "#print_postgres_query" do
