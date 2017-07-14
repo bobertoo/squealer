@@ -4,6 +4,8 @@ a csv to postgresql table creation tool
 navigate to the project directory and then type `ruby bin/run.rb <pathtocsvfile>`.
 CSV filename must have `.csv` extension with columns that include `int`, `float4`, `varchar`, `timestamp`(iso8601), and `boolean`.
 ## example
+`data.csv` is included at the root directory of project to all for easy demonstration
+
 input:
 
 `ruby bin/run.rb data.csv`
